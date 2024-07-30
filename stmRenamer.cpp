@@ -12,7 +12,7 @@ int main(){
     
     for (auto pathName : dir.directoryContents){
         std::tuple<bool, std::string> nameInFile {dir.renamerObj.isNameInFileName(aliasTxt, pathName, dir.userInput)};
-        std::string nameFormat { dir.renamerObj.reformatName(pathName, dir.userInput) };
+        std::string nameFormat { dir.renamerObj.reformatName(aliasTxt, pathName, dir.userInput) };
         printer.print(nameFormat);
         std::cout << std::endl;
     }

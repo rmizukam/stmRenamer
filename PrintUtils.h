@@ -18,6 +18,8 @@ class PrintUtils{
         void print(std::filesystem::path singlePath);
         void print(std::vector<std::filesystem::path> vecPaths);
         void print(std::tuple<bool, std::string> tup2print);
+        void print(std::vector<std::filesystem::path>, std::vector<std::filesystem::path>);
+        void print(std::vector<std::string>, std::vector<std::string>);
         PrintUtils();
 };
 

@@ -84,6 +84,7 @@ std::string FRenamer::reformatName(std::vector<std::string> aliasTxt, std::files
     std::string hour {};
     std::string min {};
     std::string sec {};
+    std::string parentDir {filePath.parent_path().string()};
     std::string fileName { filePath.stem().string() };
     std::string fileExt { filePath.extension().string() };
     std::tuple nameInFileInfo = isNameInFileName(aliasTxt,filePath, name);
@@ -177,6 +178,8 @@ std::string FRenamer::reformatName(std::vector<std::string> aliasTxt, std::files
     }
     dateStr += fileExt;
     std::string outputName {name2use + "_" + dateStr};
+    std::filesystem::path newPath {std::filesystem::path(parentDir) /= outputName};
+    newNames.push_back(newPath);
     return {outputName};
 }
 

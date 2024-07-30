@@ -3,6 +3,7 @@
 #include <vector>
 #include "DirParser.h"
 #include "PrintUtils.h"
+#include <regex>
 
 int main(){
     PrintUtils printer;

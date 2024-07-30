@@ -93,43 +93,91 @@ std::string FRenamer::reformatName(std::vector<std::string> aliasTxt, std::files
     std::regex desiredDateFormat {"\\d{4}-\\d{2}-\\d{2}[\\s|_|:]\\d{2}-\\d{2}(-\\d{2})*.*"};
     std::regex year_Month_DD_HH_mm_ss {"\\d{4}-\\w-\\d{2}_\\d{2}-\\d{2}-*\\d{2}*"};
     std::regex MMDDYYYY_combine {"\\d{8}-\\d{2}-\\d{2}-\\d{2}"};
-    std::regex HHmmss_combine {"\\d{4}-\\d{2}-\\d{2}_*\\d{6}"};
+    std::regex HHmmss_combine {"\\d{4}-\\d{2}-\\d{2}[_| |:]*\\d{6}"};
     std::regex Month_DD_YYYY_HH_mm_ss {"\\w-\\d{2}-\\d{4}_\\d{2}-\\d{2}-*\\d{2}*"};
     std::regex YYYYMMDDHHmm_combine {"\\d{12}"};
+
     const int MAX_ELEMENTS_IN_DATE {6};
     std::vector<std::string> finalNums {};
     if (std::regex_search(fileName, desiredDateFormat)){
         std::vector<std::string> numsInFileName = extractNums(fileName);
         numsInFileName = removeNumsInName(numsInFileName, nNumsInName);
-        for (size_t i {0}; i < MAX_ELEMENTS_IN_DATE; i++){
-            finalNums.push_back(numsInFileName.at(i));
+        year = numsInFileName.at(0);
+        month = numsInFileName.at(1);
+        day = numsInFileName.at(2);
+        hour = numsInFileName.at(3);
+        min = numsInFileName.at(4);
+        if (numsInFileName.size() <= 6){
+            sec = numsInFileName.at(5);
+        }else{
+            sec = "";
         }
     } else if (std::regex_search(fileName, year_Month_DD_HH_mm_ss)){
         fileName = convertMonthString2MonthIdx(fileName);
         std::vector<std::string> numsInFileName = extractNums(fileName);
         numsInFileName = removeNumsInName(numsInFileName, nNumsInName);
+        year = numsInFileName.at(0);
+        month = numsInFileName.at(1);
+        day = numsInFileName.at(2);
+        hour = numsInFileName.at(3);
+        min = numsInFileName.at(4);
+        if (numsInFileName.size() <= 6){
+            sec = numsInFileName.at(5);
+        }else{
+            sec = "";
+        }
     } else if (std::regex_search(fileName, MMDDYYYY_combine)){
         std::vector<std::string> numsInFileName = extractNums(fileName);
         numsInFileName = removeNumsInName(numsInFileName, nNumsInName);
+        std::string monthDayYear {numsInFileName.at(0)};
+        month = monthDayYear.substr(0,2);
+        day = monthDayYear.substr(2,2);
+        year = monthDayYear.substr(4,4);
+        hour = numsInFileName.at(1);
+        min = numsInFileName.at(2);
+        sec = numsInFileName.at(3);
     } else if (std::regex_search(fileName, HHmmss_combine)){
         std::vector<std::string> numsInFileName = extractNums(fileName);
         numsInFileName = removeNumsInName(numsInFileName, nNumsInName);
+        year = numsInFileName.at(0);
+        month = numsInFileName.at(1);
+        day = numsInFileName.at(2);
+        std::string hourMinSec {numsInFileName.at(3)};
+        hour = hourMinSec.substr(0, 2);
+        min = hourMinSec.substr(2, 2);
+        sec = hourMinSec.substr(4,2);
     } else if (std::regex_search(fileName, Month_DD_YYYY_HH_mm_ss)) {
+        fileName = convertMonthString2MonthIdx(fileName);
         std::vector<std::string> numsInFileName = extractNums(fileName);
         numsInFileName = removeNumsInName(numsInFileName, nNumsInName);
+        month = numsInFileName.at(0);
+        day = numsInFileName.at(1);
+        year = numsInFileName.at(2);
+        hour = numsInFileName.at(3);
+        min = numsInFileName.at(4);
+        if (numsInFileName.size() <= 6){
+            sec = numsInFileName.at(5);
+        }else{
+            sec = "";
+        }
     } else if (std::regex_search(fileName, YYYYMMDDHHmm_combine)){
         std::vector<std::string> numsInFileName = extractNums(fileName);
         numsInFileName = removeNumsInName(numsInFileName, nNumsInName);
+        std::string YYYYMMDDHHmm {numsInFileName.at(0)};
+        year = YYYYMMDDHHmm.substr(0, 4);
+        month = YYYYMMDDHHmm.substr(4, 2);
+        day = YYYYMMDDHHmm.substr(6, 2);
+        hour = YYYYMMDDHHmm.substr(8, 2);
+        min = YYYYMMDDHHmm.substr(10,2);
+        sec = "";
     }
-
-
-
-
-
-
-    
-    
-
+    std::string dateStr = year + "-" + month + "-" + day + "_" + hour + "-" + min;
+    if (sec.compare("") != 0){
+        dateStr += sec;
+    }
+    dateStr += fileExt;
+    std::string outputName {name2use + "_" + dateStr};
+    return {outputName};
 }
 
 std::filesystem::path FRenamer::getRepoRoot(){

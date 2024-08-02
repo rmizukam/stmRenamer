@@ -4,15 +4,27 @@
 #include <regex>
 #include "DirectoryParser.hpp"
 
-DirectoryParser::DirectoryParser()
-    :directoryContents{}
-{}
 
-DirectoryParser::DirectoryParser(std::string)
-    :directoryContents{}
-{
+DirectoryParser::DirectoryParser(std::filesystem::path inputPath) {
     int anticipatedDirSize {200};
     directoryContents.reserve(anticipatedDirSize); // pre-allocate memory
+    parseDirectory(inputPath);
+}
+
+DirectoryParser::DirectoryParser(std::string folderName) {
+    std::filesystem::path configPath = getRepoRoot();
+    configPath/="baseDirs.txt";
+    std::vector<std::filesystem::directory_entry> baseDirs {readConfig(configPath)};
+    std::filesystem::path pathToFolder {};
+    for (auto path:baseDirs) {
+        std::filesystem::path userPath = path.path() / std::filesystem::path(folderName);
+        if(std::filesystem::directory_entry(userPath).exists()){
+            int anticipatedDirSize {200};
+            directoryContents.reserve(anticipatedDirSize); // pre-allocate memory
+            parseDirectory(userPath);
+            break;
+        }
+    }
 }
 
 // Function to check if a string ends with another string 
@@ -34,6 +46,16 @@ bool DirectoryParser::endsWith(const std::string& fullString, const std::vector<
     }
 } 
 
+std::filesystem::path DirectoryParser::getRepoRoot(){
+    std::filesystem::path currentPath {std::filesystem::current_path()};
+    return {currentPath};
+}
+
+void DirectoryParser::makeDirName(std::filesystem::path) {
+
+}
+
+
 void DirectoryParser::parseDirectory(std::filesystem::path pathToDir){
     std::regex aliasPattern {"alias"};
     std::vector<std::string> fileExtToExtract {".mp4", ".jpgeg"};
@@ -42,6 +64,11 @@ void DirectoryParser::parseDirectory(std::filesystem::path pathToDir){
             directoryContents.push_back(entry);
         }
     }
+}
+
+void DirectoryParser::parseDirectory(std::string pathToDirString) {
+    std::filesystem::path pathToDir {std::filesystem::path(pathToDirString)};
+    parseDirectory(pathToDir);
 }
 
 void DirectoryParser::print(){
@@ -56,10 +83,8 @@ std::vector<std::filesystem::directory_entry> DirectoryParser::readConfig(std::f
     std::string line;
     while (std::getline (fileIn, line)){
         std::istringstream ss(line);
-        std::string tempStr;
-        while(ss >> tempStr){
-            contents.push_back(std::filesystem::directory_entry(tempStr));
-        }
+        std::filesystem::directory_entry tempDirEntry {line};
+        contents.push_back(tempDirEntry);
     }
     fileIn.close();
     return contents;

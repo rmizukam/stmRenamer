@@ -4,27 +4,44 @@
 #include <regex>
 #include "DirectoryParser.hpp"
 
+DirectoryParser::DirectoryParser() 
+    :directoryContents{}, directoryLocation{}
+{}
 
-DirectoryParser::DirectoryParser(std::filesystem::path inputPath) {
-    int anticipatedDirSize {200};
-    directoryContents.reserve(anticipatedDirSize); // pre-allocate memory
-    parseDirectory(inputPath);
+void DirectoryParser::setDirectoryLocation(std::string folderName){
+    bool dirNotFound {true};
+    while (dirNotFound){
+        std::tuple<bool,std::filesystem::directory_entry> dirExistsInfo = directoryExists(folderName);
+        if (std::get<bool>(dirExistsInfo)){
+            dirNotFound = false;
+            directoryLocation = std::get<std::filesystem::directory_entry>(dirExistsInfo);
+        } else {
+            std::cout << "Directory Not Found. Please Try again: ";
+            std::cin >> folderName;
+        }
+    }
 }
 
-DirectoryParser::DirectoryParser(std::string folderName) {
+std::tuple<bool, std::filesystem::directory_entry> DirectoryParser::directoryExists(std::string folderName){
     std::filesystem::path configPath = getRepoRoot();
     configPath/="baseDirs.txt";
     std::vector<std::filesystem::directory_entry> baseDirs {readConfig(configPath)};
     std::filesystem::path pathToFolder {};
+    std::filesystem::path userPath {};
+    bool dirExists {false};
     for (auto path:baseDirs) {
-        std::filesystem::path userPath = path.path() / std::filesystem::path(folderName);
+        userPath = path.path() / std::filesystem::path(folderName);
         if(std::filesystem::directory_entry(userPath).exists()){
             int anticipatedDirSize {200};
             directoryContents.reserve(anticipatedDirSize); // pre-allocate memory
-            parseDirectory(userPath);
+            dirExists = true;
             break;
         }
     }
+    if (!dirExists){
+        userPath = "";
+    }
+    return {dirExists, std::filesystem::directory_entry(userPath)};
 }
 
 // Function to check if a string ends with another string 
@@ -51,18 +68,9 @@ std::filesystem::path DirectoryParser::getRepoRoot(){
     return {currentPath};
 }
 
-void DirectoryParser::makeDirName(std::filesystem::path) {
-
-}
-
-
 void DirectoryParser::parseDirectory(std::filesystem::path pathToDir){
-    std::regex aliasPattern {"alias"};
-    std::vector<std::string> fileExtToExtract {".mp4", ".jpgeg"};
     for (const auto &entry : std::filesystem::directory_iterator(pathToDir)){
-        if (endsWith(entry.path().string(), fileExtToExtract)){
-            directoryContents.push_back(entry);
-        }
+        directoryContents.push_back(entry);
     }
 }
 
@@ -104,3 +112,9 @@ std::vector<std::string> DirectoryParser::readConfig(std::string txtPath){
     fileIn.close();
     return contents;
 }
+
+bool DirectoryParser::startsWith(const std::string& fullString, const std::string& beginning) { 
+    if (beginning.size() > fullString.size()) 
+        return false; 
+    return fullString.compare(0, fullString.size() - beginning.size(), beginning) == 0; 
+} 

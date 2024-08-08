@@ -2,6 +2,8 @@
 #include "DirectoryParser.hpp"
 #include "FileRenamer.hpp"
 
+bool isNumber(const std::string &);
+
 int main(){
     std::cout << "Welcome to file renamer" << std::endl;
     std::cout << "select an option from the menu below" << std::endl;
@@ -15,7 +17,8 @@ int main(){
     frenamer.parseDirectoryForRename();
     frenamer.reformatName(folderName);
 
-    int userResponse {};
+    std::string userResponseStr {};
+    int userResponse{};
     do {
         std::cout << "______________________________________________" << std::endl;
         std::cout << "0. Execute Rename" << std::endl;
@@ -25,8 +28,14 @@ int main(){
         std::cout << "4. Enter New Folder" << std::endl;
         std::cout << "5. Exit" << std::endl;
         std::cout << "Enter Response: ";
-        std::cin >> userResponse;
+        std::cin >> userResponseStr;
         std::cout << "______________________________________________" << std::endl;
+
+        if (isNumber(userResponseStr) && userResponseStr.size() == 1){
+            userResponse = std::stoi(userResponseStr);
+        } else {
+            userResponse = -1;
+        }
 
         if (userResponse == 1){
             frenamer.print(frenamer.directoryContents, frenamer.newFileNames);
@@ -49,5 +58,15 @@ int main(){
             std::cout << "Invalid Entry. Please try again: ";
             std::cin >> userResponse;
         }
+
     } while (operating);
+}
+
+bool isNumber(const std::string &stringUserInput) {
+    for (auto c:stringUserInput) {
+        if (!isdigit(c)){
+            return {false};
+        }
+    }
+    return {true};
 }

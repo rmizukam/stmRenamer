@@ -90,7 +90,7 @@ std::string FileRenamer::getIndex(std::vector<std::string> v, std::string K){
 
 void FileRenamer::parseDirectoryForRename(std::filesystem::path pathToDir){
     std::regex aliasPattern {"alias", std::regex::icase};
-    std::vector<std::string> fileExtToExtract {".mp4", ".jpgeg"};
+    std::vector<std::string> fileExtToExtract {".mp4", ".jpeg", ".ts", ".mkv"};
     for (const auto &entry : std::filesystem::directory_iterator(pathToDir)){
         if (endsWith(entry.path().string(), fileExtToExtract)){
             directoryContents.push_back(entry);

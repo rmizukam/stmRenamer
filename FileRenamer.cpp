@@ -9,18 +9,20 @@ std::string FileRenamer::convertMonthString2MonthIdx(std::string fName){
     std::vector<std::string> listOfMonthAbreviate = readConfig(listOfMonthTxt.replace_filename("listOfMonthsAbreviate.txt").string());
     bool matchFound {false};
     bool matchFoundAbr {false};
+    std::regex monthPattern;
+    std::regex monthPatternAbr;
     for (size_t i{0}; i < listOfMonths.size(); i++){
-        std::regex monthPattern (listOfMonths.at(i));
+        monthPattern = listOfMonths.at(i);
+        monthPatternAbr = listOfMonthAbreviate.at(i);
         matchFound = std::regex_search(fName, monthPattern);
-        std::regex monthPatternAbr (listOfMonthAbreviate.at(i));
         matchFoundAbr = std::regex_search(fName, monthPatternAbr);
         if (matchFound){
             std::string monthNum {getIndex(listOfMonths, listOfMonths.at(i))};
-            std::regex_replace(fName, monthPattern, monthNum);
+            fName = std::regex_replace(fName, monthPattern, monthNum);
             break;
         }else if (matchFoundAbr){
             std::string monthNum {getIndex(listOfMonths, listOfMonthAbreviate.at(i))};
-            std::regex_replace(fName, monthPatternAbr, monthNum);
+            fName = std::regex_replace(fName, monthPatternAbr, monthNum);
             break;
         }
     }
@@ -29,7 +31,8 @@ std::string FileRenamer::convertMonthString2MonthIdx(std::string fName){
 
 std::string FileRenamer::convertNum2Str(int num){
     char buffer [5];
-    return { std::string(buffer) };
+    sprintf(buffer, "%02d", num);
+    return {std::string(buffer)};
 }
 
 void FileRenamer::executeRename(std::string userInput){
@@ -85,7 +88,7 @@ std::string FileRenamer::getIndex(std::vector<std::string> v, std::string K){
         // If the element is not present in the vector 
         index = -1 ;
     } 
-    return { convertNum2Str(index) };
+    return { convertNum2Str(index + 1) };
 }
 
 void FileRenamer::parseDirectoryForRename(std::filesystem::path pathToDir){
@@ -158,7 +161,7 @@ std::string FileRenamer::reformatName(std::filesystem::path filePath, std::strin
     int nNumsInName = extractAmtNumInName(name2use);
 
     std::regex desiredDateFormat {"\\d{4}-\\d{2}-\\d{2}[\\s|_|:]\\d{2}-\\d{2}(-\\d{2})*.*", std::regex::icase};
-    std::regex year_Month_DD_HH_mm_ss {"\\d{4}-\\w-\\d{2}_\\d{2}-\\d{2}-*\\d{2}*", std::regex::icase};
+    std::regex year_Month_DD_HH_mm_ss {"\\d{4}-\\w{3,9}-\\d{2}_\\d{2}-\\d{2}-*\\d{2}*", std::regex::icase};
     std::regex MMDDYYYY_combine {"\\d{8}-\\d{2}-\\d{2}-\\d{2}", std::regex::icase};
     std::regex HHmmss_combine {"\\d{4}-\\d{2}-\\d{2}[_| |:]*\\d{6}", std::regex::icase};
     std::regex DDMMYYYY_HHmm {"\\d{8}[_|-]{1}\\d{4}", std::regex::icase};
